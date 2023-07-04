@@ -15,6 +15,7 @@ from .color import (ColorVisuals,
                     uv_to_interpolated_color,
                     linear_color_map)
 
+from .base import Visuals
 from .texture import TextureVisuals
 from .objects import create_visual, concatenate
 
