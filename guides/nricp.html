@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Non-Rigid Registration &mdash; trimesh 3.23.5 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            trimesh
+          </a>
+              <div class="version">
+                3.23.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="http://github.com/mikedh/trimesh">Github</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../trimesh.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">trimesh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Non-Rigid Registration</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/mikedh/trimesh/blob/main/docs/guides/nricp.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="non-rigid-registration">
+<h1>Non-Rigid Registration<a class="headerlink" href="#non-rigid-registration" title="Permalink to this heading"></a></h1>
+<p>Mesh non-rigid registration methods are capable of aligning (<em>i.e.</em> superimposing) a <em>source mesh</em> on a <em>target geometry</em> which can be any 3D structure that enables nearest point query. In Trimesh, the target geometry can either be a mesh <code class="docutils literal notranslate"><span class="pre">trimesh.Trimesh</span></code> or a point cloud <code class="docutils literal notranslate"><span class="pre">trimesh.PointCloud</span></code>. This process is often used to build dense correspondence, needed for the creation of <a class="reference external" href="https://www.face-rec.org/algorithms/3d_morph/morphmod2.pdf">3D Morphable Models</a>.
+The “non-rigid” part means that the vertices of the source mesh are not scaled, rotated and translated together to match the target geometry as with <a class="reference external" href="https://en.wikipedia.org/wiki/Iterative_closest_point">Iterative Closest Points</a> (ICP) methods. Instead, they are allowed to move <em>more or less independantly</em> to land on the target geometry.</p>
+<p>Trimesh implements two mesh non-rigid registrations algorithms which are both extensions of ICP. They are called Non-Rigid ICP methods :</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>NRICP method</p></th>
+<th class="head"><p>associated Trimesh function</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Correspondence part of <a class="reference external" href="https://people.csail.mit.edu/sumner/research/deftransfer/Sumner2004DTF.pdf">Deformation Transfer for Triangle Meshes</a><br /> Sumner and Popovic (2004)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="http://vigir.missouri.edu/~gdesouza/Research/Conference_CDs/IEEE_CVPR_2007/data/papers/0197.pdf">Optimal Step Nonrigid ICP Algorithms for Surface Registration</a> <br />Amberg <em>et al.</em> (2007)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nricp_amberg</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="deformation-transfer-nricp-nricp-sumner">
+<h2>Deformation Transfer NRICP (<code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code>)<a class="headerlink" href="#deformation-transfer-nricp-nricp-sumner" title="Permalink to this heading"></a></h2>
+<p>This method was first introduced by <a class="reference external" href="https://grail.cs.washington.edu/projects/digital-human/pub/allen03space-submit.pdf">Allen and colleagues in 2003</a> then modified and adapted by <a class="reference external" href="https://people.csail.mit.edu/sumner/research/deftransfer/Sumner2004DTF.pdf">Sumner and Popovic in 2004</a>.</p>
+<section id="how-it-works">
+<h3>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading"></a></h3>
+<p>Let’s define the source mesh $\mathcal{S} = {\mathbf{v}, \mathbf{f}}$ with $\mathbf{v} \in \mathbb{R}^{n\times3}$ being its vertices positions (<code class="docutils literal notranslate"><span class="pre">Trimesh.vertices</span></code>) and $\mathbf{f} \in \mathbb{N}^{m\times3}$ its triangles vertex indices (<code class="docutils literal notranslate"><span class="pre">Trimesh.faces</span></code>). From these we also derive its triangles vertex positions $\mathbf{t} \in \mathbb{R}^{m\times3\times3}$ (<code class="docutils literal notranslate"><span class="pre">Trimesh.triangles</span></code> or <code class="docutils literal notranslate"><span class="pre">Trimesh.vertices[Trimesh.faces]</span></code>).<br></p>
+<blockquote>
+<div><p>This method is an iterative algorithm where we seek for deformed vertices $\tilde{\mathbf{v}}$ from underformed vertices $\mathbf{v}$ via affine transformations. At each step, we solve for $\tilde{\mathbf{v}}$ given some constraints and $\mathbf{v}$ is replaced by $\tilde{\mathbf{v}}$ for the next iteration. Set <code class="docutils literal notranslate"><span class="pre">return_records=True</span></code> to get the deformed vertices at each step.</p>
+</div></blockquote>
+<p>To each triangle $\mathbf{t}_i = [\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3]_i \in \mathbb{R}^{3\times3}$ of the source mesh, a new 3D point $\mathbf{x}_4$ is added to form a tetrahedron $\mathbf{t}’_i = [\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3, \mathbf{x}_4]_i \in \mathbb{R}^{3\times4}$, with :
+$$\mathbf{x}_4= \mathbf{x}_1+ \frac{(\mathbf{x}_2 −\mathbf{x}_1)×(\mathbf{x}_3 −\mathbf{x}_1)}{\sqrt{\lvert(\mathbf{x}_2 −\mathbf{x}_1)×(\mathbf{x}_3 −\mathbf{x}_1)\rvert}}$$</p>
+<p>$\mathbf{x}_4$ is basically the point at the tip of the triangle normal starting from $\mathbf{x}_1$</p>
+<p>Each deformed vertex $\tilde{\mathbf{v}}_i$ is computed from the vertex $\mathbf{v}_i$ via an affine transformation ${\mathbf{T}, \mathbf{d}}_i$ with $\mathbf{T}_i \in \mathbb{R}^{3\times3}$ being its scaling/rotational part and $\mathbf{d}_i$ being its translational part.
+We get $\tilde{\mathbf{v}}_i = \mathbf{T}_i\mathbf{v}_i + \mathbf{d}_i$.</p>
+<p>The main idea is to subtract $\mathbf{d}$ from the previous equation. To do this, we substract $\mathbf{x}_1$ from each tetrahedron to obtain frames $\mathbf{V}_i$ and $\tilde{\mathbf{V}}_i \in \mathbb{R}^{3\times3}$ :</p>
+<p>$$
+\begin{matrix}
+\mathbf{V}_i = [\mathbf{x}_2 - \mathbf{x}_1, \mathbf{x}_3 - \mathbf{x}_1, \mathbf{x}_4 - \mathbf{x}_1]_i \
+\tilde{\mathbf{V}}_i = [\tilde{\mathbf{x}}_2 - \tilde{\mathbf{x}}_1, \tilde{\mathbf{x}}_3 - \tilde{\mathbf{x}}_1, \tilde{\mathbf{x}}_4 - \tilde{\mathbf{x}}_1]_i
+\end{matrix}
+$$</p>
+<p>Thus,
+$$\tilde{\mathbf{V}}_i = \mathbf{T}_i\mathbf{V}_i \implies \mathbf{T}_i = \tilde{\mathbf{V}}_i\mathbf{V}_i^{-1}$$</p>
+<p>Now, several energies are defined to solve directly for the deformed vertices $\tilde{\mathbf{v}}$ :</p>
+<ul class="simple">
+<li><p>The <strong>closest valid point term</strong> (data term) $E_C$ indicates that the position of each vertex $\tilde{\mathbf{v}}_i$ of the deformed source mesh should be equal to the closest valid point $\mathbf{c}_i$ on the target geometry. This error is weighted by the <a class="reference external" href="#robustness-to-outliers"><em>closest point validity weights</em></a> $\boldsymbol{\alpha}$.</p></li>
+</ul>
+<p>$$E_C = \sum\limits^n_{i=1} \boldsymbol{\alpha}_i \lVert \tilde{\mathbf{v}}_i - \mathbf{c}_i \rVert^2$$</p>
+<ul class="simple">
+<li><p>The <strong>deformation identity term</strong>  $E_I$ is minimized when all the transformations $\mathbf{T}$ are equal to the identity matrix :</p></li>
+</ul>
+<p>$$E_I = \sum\limits^{\lvert T\rvert}_{i=1} \lVert \mathbf{T}<em>i - \mathbf{I}\rVert^2</em>\text{F}$$</p>
+<ul class="simple">
+<li><p>The <strong>deformation smoothness term</strong> (stiffness term) $E_S$ indicates that the transformations for adjacent triangles should be equal :</p></li>
+</ul>
+<p>$$E_S=\sum\limits^{\lvert T\rvert}<em>i\sum\limits</em>{j\in \text{adj}(i)} \lVert \mathbf{T}_i - \mathbf{T}<em>j\rVert^2</em>\text{F}$$</p>
+<blockquote>
+<div><p>The type of face adjacency is determined by the argument <code class="docutils literal notranslate"><span class="pre">face_pairs_type</span></code>, options being <code class="docutils literal notranslate"><span class="pre">'vertex'</span></code> and <code class="docutils literal notranslate"><span class="pre">'edge'</span></code>. With <code class="docutils literal notranslate"><span class="pre">face_pairs_type='edge'</span></code>, only the faces sharing an edge are considered adjacents, whereas with <code class="docutils literal notranslate"><span class="pre">face_pairs_type='vertex'</span></code>, all the faces sharing at least one vertex are considered adjacents, resulting in a stronger smoothness constraint.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>The <strong>landmark consistency term</strong> $E_L$ indicates that the $q$ landmarks ${f, \mathbf{b}}$ on the deformed source mesh surface should be on their corresponding position $\mathbf{p}$ on the target geometry. $\mathbf{b}$ are the barycentric coordinates of the landmarks in their respective triangles of indices $f$.</p></li>
+</ul>
+<p>$$E_L = \sum\limits^q_{i=1} \lVert \tilde{\mathbf{t}}_{f_i} \cdot \mathbf{b}_i^\text{T} - \mathbf{p}_i \rVert^2$$</p>
+<blockquote>
+<div><p>In the original paper, the landmark target positions are a hard constraint. Here the user can decide how important the landmarks are, so an extra energy $E_L$ is added.</p>
+</div></blockquote>
+<blockquote>
+<div><p>The source landmarks <code class="docutils literal notranslate"><span class="pre">source_landmarks</span></code> can come either as an array of vertex indices or a tuple of an array of triangle indices and an array of barycentric coordinates.</p>
+</div></blockquote>
+<p>The energies $E_I$ and $E_S$ depend not only on the deformed vertices $\tilde{\mathbf{v}}$ but also on the deformed frames $\tilde{\mathbf{V}}$. So we simultaneously solve for both $\tilde{\mathbf{v}}$ and the fourth vertex $\tilde{\mathbf{x}}_4$ of the deformed tetrahedrons :</p>
+<p>$$\min\limits_{\tilde{\mathbf{v}}, \tilde{\mathbf{x}}_4} E = w_CE_C + w_IE_I + w_SE_S + w_LE_L$$
+Where $w_C, w_I, w_S$ and $w_L$ are weighting factors used to determine what energies are more important to minimize. The solution to this optimization is the solution to a system of linear equations :</p>
+<p>$$
+\min\limits_{\tilde{\mathbf{v}}, \tilde{\mathbf{x}}_4}
+\begin{Vmatrix}
+\begin{bmatrix}
+w_C\mathbf{A}_C\
+w_I\mathbf{A}_I\
+w_S\mathbf{A}_S\
+w_L\mathbf{A}_L\
+\end{bmatrix}
+\mathbf{y}^\text{T}-
+\begin{bmatrix}
+w_C\mathbf{b}_C\
+w_I\mathbf{b}_I\
+w_S\mathbf{b}<em>S\
+w_L\mathbf{b}<em>L\
+\end{bmatrix}
+\end{Vmatrix}^2</em>\text{F} =
+\min\limits</em>{\tilde{\mathbf{v}}, \tilde{\mathbf{x}}<em>4}
+\lVert\mathbf{A}\mathbf{y}^\text{T} - \mathbf{b}\rVert^2</em>\text{F}
+$$</p>
+<p>Where $\mathbf{y} \in \mathbb{R}^{(n+m)\times3}$ is the concatenated deformed vertices $\tilde{\mathbf{v}}$ and deformed fourth tetrahedron vertices $\tilde{\mathbf{x}}_4$, $\mathbf{A}$ is the sparse matrix that relates $\tilde{\mathbf{v}}$ to $\mathbf{c}$ and $\tilde{\mathbf{V}}$ to $\mathbf{T}$. The right hand side $\mathbf{b}$ contains the ideal vertex positions and frame transformations corresponding to each energy.</p>
+<p>This linear system is solved using LU factorization of $\mathbf{A}^\text{T}\mathbf{A}$. The deformed vertices are just the $\text{n}^\text{th}$ first rows of the solution :
+$$\tilde{\mathbf{v}} = \mathbf{y}_{:n}$$
+Then we either start the next iteration or return the result.</p>
+</section>
+<section id="number-of-iterations">
+<h3>Number of iterations<a class="headerlink" href="#number-of-iterations" title="Permalink to this heading"></a></h3>
+<p>The number of iterations is determined by the length of the <code class="docutils literal notranslate"><span class="pre">steps</span></code> argument. <code class="docutils literal notranslate"><span class="pre">steps</span></code> should be an iterable of five floats iterables  <code class="docutils literal notranslate"><span class="pre">[[wc_1,</span> <span class="pre">wi_1,</span> <span class="pre">ws_1,</span> <span class="pre">wl_1,</span> <span class="pre">wn_1],</span> <span class="pre">...,</span> <span class="pre">[wc_n,</span> <span class="pre">wi_n,</span> <span class="pre">ws_n,</span> <span class="pre">wl_n,</span> <span class="pre">wn_n]]</span></code>. The floats should correspond to $w_C, w_I, w_S, w_L$ and $w_N$. The extra weight $w_N$ is related to outlier robustness.</p>
+</section>
+<section id="robustness-to-outliers">
+<h3>Robustness to outliers<a class="headerlink" href="#robustness-to-outliers" title="Permalink to this heading"></a></h3>
+<p>The target geometry can be noisy or incomplete which can lead to bad closest points $\mathbf{c}$. To remedy this issue, the linear equations related to $E_C$ are also weighted by <em>closest point validity weights</em>. First, if the distance to the closest point greater than the user specified threshold <code class="docutils literal notranslate"><span class="pre">distance_threshold</span></code>, the corresponding linear equations are multiplied by 0 (<em>i.e.</em> removed). Second, one may need the normals at the source mesh vertices and the normals at target geoemtry closest points to coincide. We use the dot product to the power $w_N$ to determine if normals are well aligned and use it to weight the linear equations. Eventually, the <em>closest point validity weights</em> are :</p>
+<p>$$
+\boldsymbol{\alpha}=\left[
+\begin{array}{ll}
+0 &amp; \text{where }\lVert\mathbf{v} - \mathbf{c}\rVert^2 &gt; d_{max}\
+\max(0, (\mathbf{n}_v^\text{T}\cdot\mathbf{n}_c)^{w_N}) &amp; \text{everywhere else}\
+\end{array}
+\right]
+$$</p>
+<p>With $d_{max}$ being the threshold given with the argument <code class="docutils literal notranslate"><span class="pre">distance_threshold</span></code>, and $\mathbf{n}_v$ and $\mathbf{n}_c$ the normals mentionned above.</p>
+</section>
+<section id="summary">
+<h3>Summary<a class="headerlink" href="#summary" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>For $w_C^i, w_I^i, w_S^i, w_L^i, w_N^i, \text{ } i \in [1, \text{nbsteps}]$</p>
+<ul>
+<li><p>Compute the closest points $\mathbf{c}$</p></li>
+<li><p>Build $\mathbf{A}_C$ and $\boldsymbol{\alpha}$</p></li>
+<li><p>Solve for the deformed vertices $\tilde{\mathbf{v}}$</p></li>
+<li><p>$\mathbf{v} ← \tilde{\mathbf{v}}$</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="optimal-step-nricp-nricp-amberg">
+<h2>Optimal Step NRICP (<code class="docutils literal notranslate"><span class="pre">nricp_amberg</span></code>)<a class="headerlink" href="#optimal-step-nricp-nricp-amberg" title="Permalink to this heading"></a></h2>
+<p><em>Some notations and details are described in <a class="reference external" href="#deformation-transfer-nricp-nricp_sumner">Deformation Transfer NRICP section</a></em></p>
+<p>Unlike Deformation Transfer where we solve directly for deformed tetrahedrons, this methods solves for affine transformations $\mathbf{X}_i$ that map each $\mathbf{v}_i$ to $\tilde{\mathbf{v}}_i$.</p>
+<section id="id1">
+<h3>How it works<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<p>The vertices $\mathbf{v}$ are expressed in their homogeneous form $\mathbf{w}$:</p>
+<p>$$
+\begin{matrix}
+\mathbf{w}_i = [x, y, z, 1]_i^\text{T} \
+\end{matrix}
+$$</p>
+<p>With this formulation, the deformed vertices are $\tilde{\mathbf{v}}_i = \mathbf{w}_i^\text{T}\mathbf{X}_i$, where $\mathbf{X}_i$ are $4\times3$ matrices, enabling translation.</p>
+<p>Three energies are minimized :</p>
+<ul class="simple">
+<li><p>The <strong>closest valid point term</strong> (data term) $E_C$ :</p></li>
+</ul>
+<p>$$E_C = \sum\limits^n_{i=1} \boldsymbol{\alpha}_i \lVert \mathbf{w}_i^\text{T}\mathbf{X}_i - \mathbf{c}_i \rVert^2$$</p>
+<ul class="simple">
+<li><p>The <strong>deformation smoothness term</strong> (stiffness term) $E_S$. In the following, $\mathbf{G}=[1,1,1,\gamma]$ is used to weights differences in the rotational and skew part of the deformation, and can be accesed via the argument <code class="docutils literal notranslate"><span class="pre">gamma</span></code>. Two vertices are adjacent if they share an edge.</p></li>
+</ul>
+<p>$$E_S = \sum\limits^n_{j\in\text{adj}(i)} \lVert (\mathbf{X}_i - \mathbf{X}_j) \mathbf{G} \rVert^2$$</p>
+<ul class="simple">
+<li><p>The <strong>landmarks consistency term</strong> $E_L :$</p></li>
+</ul>
+<p>$$E_L = \sum\limits^q_{i=1} \lVert (\tilde{\mathbf{t}}_{f_i} \cdot \mathbf{b}_i^\text{T})^\text{T}\mathbf{X}_i - \mathbf{p}_i \rVert^2$$</p>
+<p>The resulting optimization is :</p>
+<p>$$\min\limits_{\mathbf{X}} E = E_C + w_SE_S + w_LE_L$$</p>
+<blockquote>
+<div><p>Note the absence of weight for $E_C$. This is just to match how the framework is described in the paper.</p>
+</div></blockquote>
+<p>Optimization that be rewritten in matrix form (this is well explained in the <a class="reference external" href="http://vigir.missouri.edu/~gdesouza/Research/Conference_CDs/IEEE_CVPR_2007/data/papers/0197.pdf">paper</a>) :</p>
+<p>$$
+\min\limits_{\mathbf{X}}
+\begin{Vmatrix}
+\begin{bmatrix}
+\mathbf{A}_C\
+w_S\mathbf{A}_S\
+w_L\mathbf{A}<em>L\
+\end{bmatrix}
+\mathbf{X}-
+\begin{bmatrix}
+\mathbf{b}<em>C\
+0\
+w_L\mathbf{b}<em>L\
+\end{bmatrix}
+\end{Vmatrix}^2</em>\text{F} =
+\min\limits</em>{\mathbf{X}}
+\lVert\mathbf{A}\mathbf{X} - \mathbf{b}\rVert^2</em>\text{F}
+$$</p>
+<p>Where $\mathbf{A}$ is the sparse matrix that links the current vertex positions to the ideal deformed vertex positions subject to the smoothness and landmarks constraints. The system $\mathbf{A}^\text{T}\mathbf{A} = \mathbf{A}^\text{T}\mathbf{b}$ is solved for $\mathbf{X}$ and deformed vertices are computed : $\tilde{\mathbf{v}}_i = \mathbf{w}_i^\text{T}\mathbf{X}_i$. Unlike, <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code>, the vertices are not replaced by the deformed vertices yet the deformed vertices are used to find new correspondences $\mathbf{c}$ on the target geometry.</p>
+<p>The algorithm contains one outer loop and one inner loop. The outer loop is similar to <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code> <em>i.e.</em> an iteration over a set of weights sets. The inner loop is performed until convergence of $\mathbf{X}$ or until a max iterations threshold  $N$ is reached.</p>
+</section>
+<section id="id2">
+<h3>Number of iterations<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<p>As with <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code>, the <code class="docutils literal notranslate"><span class="pre">steps</span></code> arguments dictates the number of outer loop iterations performed. <code class="docutils literal notranslate"><span class="pre">steps</span></code> should be in the form <code class="docutils literal notranslate"><span class="pre">[[ws_1,</span> <span class="pre">wl_1,</span> <span class="pre">wn_1,</span> <span class="pre">max_iter_1],</span> <span class="pre">...,</span> <span class="pre">[ws_n,</span> <span class="pre">wl_n,</span> <span class="pre">wn_n,</span> <span class="pre">max_iter_n]]</span></code>. The values should correspond to $w_S, w_L$ and $w_N$. The extra weight $w_N$ is related to outlier robustness. The last number is an integer specifying $N_i$, the number of maximum iterations in the inner loop.</p>
+</section>
+<section id="id3">
+<h3>Robustness to outliers<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<p>The <a class="reference external" href="#robustness-to-outliers">same implementation</a> than <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code> is used, with maximum distance threshold and normal weighting.</p>
+</section>
+<section id="id4">
+<h3>Summary<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Initialize the transformations $\mathbf{X^0}$ to the $4\times3$ identity</p></li>
+<li><p>For $w_S^i, w_L^i, w_N^i, N_i \text{ } i \in [1, \text{nbsteps}]$ :</p>
+<ul>
+<li><p>$j ← 0$</p></li>
+<li><p>While $\lVert\mathbf{X}^j - \mathbf{X}^{j-1}\rVert^2_\text{F} &gt; \epsilon$ and $j &lt; N_i$ :</p>
+<ul>
+<li><p>Compute the closest points $\mathbf{c}$ to the source vertices deformed by transformations $\mathbf{X}^{j-1}$</p></li>
+<li><p>Compute $\boldsymbol{\alpha}$</p></li>
+<li><p>Solve for the current transformations $\mathbf{X}^j$</p></li>
+<li><p>$j ← j + 1$</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<div><p>In contrast to <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code>, the matrix $\mathbf{A}_C$ is built only once at initilization.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="comparison-of-the-two-methods">
+<h2>Comparison of the two methods<a class="headerlink" href="#comparison-of-the-two-methods" title="Permalink to this heading"></a></h2>
+<p>The main difference between <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code> and <code class="docutils literal notranslate"><span class="pre">nricp_amberg</span></code> is the kind of transformations that is optimized. <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code> involves frames with an extra vertex representing the orientation of the triangles, and solves implicitly for transformations that act on these frames. In <code class="docutils literal notranslate"><span class="pre">nricp_amberg</span></code>, per-vertex transformations are explicitly solved for which allows to construct the correspondence cost matrix $\mathbf{A}_C$ only once. As a result, <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code> tends to output smoother results with less high frequencies. The users are advised to try both algorithms with different parameter sets, especially different <code class="docutils literal notranslate"><span class="pre">steps</span></code> arguments, and find which suits better their problem.  <code class="docutils literal notranslate"><span class="pre">nricp_amberg</span></code> appears to be easier to tune, though.</p>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h2>
+<p>An example of each method can be found in <code class="docutils literal notranslate"><span class="pre">examples/nricp.py</span></code>.</p>
+</section>
+<section id="acknowledgments">
+<h2>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Some implementation details of <code class="docutils literal notranslate"><span class="pre">nricp_sumner</span></code> are borrowed, adapted and optimized from the <a class="reference external" href="https://github.com/mickare/Deformation-Transfer-for-Triangle-Meshes">Deformation-Transfer-for-Triangle-Meshes github repository</a> from the user mickare.</p></li>
+<li><p>Some implementation details of <code class="docutils literal notranslate"><span class="pre">nricp_amberg</span></code> are borrowed, adapted and optimized from the <a class="reference external" href="https://github.com/saikiran321/nonrigid_icp">nonrigid_icp github repository</a> from the user saikiran321.</p></li>
+</ul>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.face-rec.org/algorithms/3d_morph/morphmod2.pdf">[1999, Blanz and Vetter] A Morphable Model For The Synthesis Of 3D Faces</a></p></li>
+<li><p><a class="reference external" href="https://grail.cs.washington.edu/projects/digital-human/pub/allen03space-submit.pdf">[2003, Allen et al.] The space of human body shapes:
+reconstruction and parameterization from range scans</a></p></li>
+<li><p><a class="reference external" href="https://people.csail.mit.edu/sumner/research/deftransfer/Sumner2004DTF.pdf">[2004, Sumner and Popovic] Deformation Transfer for Triangle Meshes</a></p></li>
+<li><p><a class="reference external" href="http://vigir.missouri.edu/~gdesouza/Research/Conference_CDs/IEEE_CVPR_2007/data/papers/0197.pdf">[2007, Amberg et al.] Optimal Step Nonrigid ICP Algorithms for Surface Registration</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Michael Dawson-Haggerty.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-161434837-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-161434837-1', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
